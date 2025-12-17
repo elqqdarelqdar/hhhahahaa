@@ -2,21 +2,135 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вертикальная Рулетка (Текстовая версия)</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Christmas Lottery</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #a51d1d; /* Праздничный красный */
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+        }
+
+        #app { width: 100%; }
+
+        .instructions { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; }
+
+        /* Анимация тряски */
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .shake { animation: shake 0.2s ease-in-out; }
+
+        #gift-btn {
+            width: 200px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #gift-btn:active { transform: scale(0.9); }
+
+        /* Окно результата */
+        #result-container {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #prize-img { width: 80%; max-width: 400px; border-radius: 20px; }
+
+        button.close-btn {
+            margin-top: 20px;
+            padding: 10px 25px;
+            background: #ffd700;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="wheel-container">
-        <div class="pointer"></div>
 
-        <div class="wheel">
-            </div>
-    </div>
+<div id="app">
+    <div class="instructions" id="hint">Нажми на подарок 3 раза!</div>
+    <img src="gift.png" id="gift-btn" alt="Открыть подарок">
+</div>
 
-    <button id="spinButton">Крутить!</button>
+<div id="result-container">
+    <h2 id="win-text">Ваш приз!</h2>
+    <img src="" id="prize-img">
+    <button class="close-btn" onclick="location.reload()">Попробовать еще раз</button>
+</div>
 
-    <script src="script.js"></script>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Развернуть на весь экран
+
+    const prizes = [
+        { img: '5percent.png', chance: 40 },
+        { img: '15percent.png', chance: 25 },
+        { img: '20percent.png', chance: 15 },
+        { img: '30percent.png', chance: 10 },
+        { img: '50percent.png', chance: 8 },
+        { img: 'jackpot.png', chance: 2 } // Шанс 2%
+    ];
+
+    let clicks = 0;
+    const btn = document.getElementById('gift-btn');
+    const hint = document.getElementById('hint');
+
+    btn.onclick = () => {
+        clicks++;
+        btn.classList.add('shake');
+        setTimeout(() => btn.classList.remove('shake'), 200);
+        
+        hint.innerText = `Осталось кликов: ${3 - clicks}`;
+
+        if (clicks === 3) {
+            showPrize();
+        }
+    };
+
+    function showPrize() {
+        const random = Math.random() * 100;
+        let current = 0;
+        let winImg = '';
+
+        for (let p of prizes) {
+            current += p.chance;
+            if (random <= current) {
+                winImg = p.img;
+                break;
+            }
+        }
+
+        document.getElementById('prize-img').src = winImg;
+        document.getElementById('result-container').style.display = 'flex';
+        
+        // Вибрация телефона (если поддерживает Telegram)
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+    }
+</script>
+
 </body>
 </html>
