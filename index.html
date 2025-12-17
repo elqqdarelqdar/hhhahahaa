@@ -47,26 +47,58 @@
         }
         .shake { animation: shake 0.2s ease-in-out; }
 
-        #gift-btn { width: 200px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        #gift-btn { width: 180px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); margin-bottom: 20px; }
 
-        /* ИСПРАВЛЕННАЯ КНОПКА (теперь всегда сверху) */
+        /* Кнопка Список призов */
+        .prizes-list-btn {
+            background: linear-gradient(45deg, #ffd700, #ffae00);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
         .footer-link {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; text-decoration: none;
             color: white; background: rgba(0, 0, 0, 0.6);
             padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px);
-            z-index: 200; /* Самый высокий слой */
-            white-space: nowrap;
+            z-index: 200; white-space: nowrap;
         }
         .footer-link img { width: 24px; height: 24px; margin-right: 10px; }
         .footer-link span { font-size: 1rem; font-weight: bold; }
 
-        #result-container {
+        #result-container, #prizes-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center;
-            align-items: center; z-index: 10;
+            background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center;
+            align-items: center; z-index: 300;
         }
+
         #prize-img { width: 85%; max-width: 400px; border-radius: 20px; }
+
+        /* Сетка призов в модалке */
+        .prizes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        .prizes-grid img { width: 100%; border-radius: 10px; border: 1px solid #444; }
+
+        .close-modal {
+            margin-top: 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
 
         .promo-section { margin-top: 20px; width: 80%; max-width: 300px; padding-bottom: 80px; }
         .promo-input {
@@ -90,6 +122,14 @@
 <div id="app">
     <div class="instructions" id="hint">Открой подарок!</div>
     <img src="gift.png" id="gift-btn" alt="Открыть подарок">
+    <button class="prizes-list-btn" onclick="openPrizesModal()">Список призов</button>
+</div>
+
+<div id="prizes-modal">
+    <h3>Возможные призы</h3>
+    <div class="prizes-grid" id="grid-content">
+        </div>
+    <button class="close-modal" onclick="closePrizesModal()">Закрыть</button>
 </div>
 
 <div id="result-container">
@@ -97,13 +137,13 @@
     <img src="" id="prize-img">
     
     <div class="promo-section" id="promo-area">
-        <p style="font-size: 0.9rem; color: #ccc;">Напиши продавцу чтобы воспользоватся скидкой.    Для повторной прокрутки нужен код!</p>
+        <p style="font-size: 0.8rem; color: #ccc;">Напиши продавцу, чтобы воспользоваться скидкой. <br>Для повторной прокрутки нужен код!</p>
         <input type="text" id="promo-input" class="promo-input" placeholder="Введите промокод">
         <button class="promo-btn" onclick="usePromo()">Активировать</button>
     </div>
 </div>
 
-<a href="https://t.me/tokk1o_pass" class="footer-link" id="seller-link">
+<a href="https://t.me/tokk1o_pass" class="footer-link">
     <img src="tg_logo.png" alt="TG">
     <span>Купить PASS ROYALE</span>
 </a>
@@ -129,12 +169,22 @@
         if (savedPrize) {
             showFinalPrize(savedPrize);
         }
+        // Заполняем сетку призов
+        const grid = document.getElementById('grid-content');
+        prizes.forEach(p => {
+            const img = document.createElement('img');
+            img.src = p.img;
+            grid.appendChild(img);
+        });
     };
 
     function checkSub() {
         document.getElementById('sub-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
     }
+
+    function openPrizesModal() { document.getElementById('prizes-modal').style.display = 'flex'; }
+    function closePrizesModal() { document.getElementById('prizes-modal').style.display = 'none'; }
 
     let clicks = 0;
     const btn = document.getElementById('gift-btn');
@@ -172,6 +222,7 @@
         document.getElementById('prize-img').src = imgSrc;
         document.getElementById('app').style.display = 'none';
         document.getElementById('sub-screen').style.display = 'none';
+        document.getElementById('prizes-modal').style.display = 'none';
         document.getElementById('result-container').style.display = 'flex';
         
         if (tg.HapticFeedback) {
