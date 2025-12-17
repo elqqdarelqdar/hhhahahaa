@@ -1,106 +1,65 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
+const prizes = [
+  { name: "Скидка 30%", chance: 330, image: "images/Frame 7.png" },
+  { name: "Скидка 50%", chance: 150, image: "images/Frame 6.png" },
+  { name: "Скидка 5%", chance: 4000, image: "images/Frame 2.png" },
+  { name: "Скидка 20%", chance: 1000, image: "images/Frame 5.png" },
+  { name: "Скидка 15%", chance: 1500, image: "images/Frame 4.png" },
+  { name: "Скидка 10%", chance: 3000, image: "images/Frame 3.png" },
+  { name: "JACKPOT", chance: 20, image: "images/Frame 1 (2).png" }
+];
 
 const wheel = document.getElementById("wheel");
 const spinBtn = document.getElementById("spinBtn");
-const result = document.getElementById("result");
-const overlay = document.getElementById("subscribeOverlay");
-const subscribedBtn = document.getElementById("subscribedBtn");
+const prizePopup = document.getElementById("prizePopup");
+const prizeName = document.getElementById("prizeName");
+const prizeImage = document.getElementById("prizeImage");
+const closePopup = document.getElementById("closePopup");
 
-const SECTION_HEIGHT = 300;
-let currentOffset = 0;
-let spinning = false;
-
-/**
- * 🔥 ВСЕ СЕКЦИИ ЗАДАЮТСЯ ТУТ 🔥
- */
-const sections = [
-  {
-    name: "Скидка 30%",
-    chance: 330,
-    image: "images/Frame 7.png"
-  },
-  {
-    name: "Скидка 50%;",
-    chance: 150,
-    image: "images/Frame 6.png"
-  },
-  {
-    name: "Скидка 5%",
-    chance: 4000,
-    image: "images/Frame 2.png"
-  },
-  {
-    name: "Скидка 20%",
-    chance: 1000,
-    image: "images/Frame 5.png"
-  },
-  {
-    name: "Скидка 15%",
-    chance: 1500,
-    image: "images/Frame 4.png"
-  },
-  {
-    name: "Скидка 10%",
-    chance: 3000,
-    image: "images/Frame 3.png"
-  },
-  {
-    name: "JACKPOT",
-    chance: 20,
-    image: "images/Frame 1 (2).png"
-  }
-];
-
-/**
- * 🧠 Рендер секций
- */
-sections.forEach(section => {
-  const img = document.createElement("img");
-  img.src = section.image;
-  wheel.appendChild(img);
+// Создаем секции колеса
+prizes.forEach(prize => {
+  const section = document.createElement("div");
+  section.className = "section";
+  section.innerHTML = `<img src="${prize.image}" alt="${prize.name}">${prize.name}`;
+  wheel.appendChild(section);
 });
 
-/**
- * 🎯 Взвешенный рандом
- */
-function getRandomSectionIndex() {
-  const total = sections.reduce((sum, s) => sum + s.chance, 0);
-  let rand = Math.random() * total;
-
-  for (let i = 0; i < sections.length; i++) {
-    if (rand < sections[i].chance) return i;
-    rand -= sections[i].chance;
+// Функция выбора приза по шансам
+function getRandomPrize() {
+  const totalChance = prizes.reduce((sum, p) => sum + p.chance, 0);
+  let random = Math.floor(Math.random() * totalChance);
+  for (let prize of prizes) {
+    if (random < prize.chance) return prize;
+    random -= prize.chance;
   }
 }
 
-/**
- * 🎰 Крутилка
- */
-spinBtn.onclick = () => {
-  if (spinning) return;
-  spinning = true;
+// Функция вращения колеса
+function spinWheel() {
+  const prize = getRandomPrize();
+  const sectionHeight = 57; // высота одной секции
+  const index = prizes.indexOf(prize);
 
-  const index = getRandomSectionIndex();
-  const spins = 8;
+  // Вращаем колесо так, чтобы выбранная секция остановилась сверху
+  const rotations = 7; // количество полных циклов
+  const finalTranslate = -(rotations * prizes.length + index) * sectionHeight;
 
-  const offset =
-    spins * sections.length * SECTION_HEIGHT +
-    index * SECTION_HEIGHT;
+  wheel.style.transition = "transform 7s cubic-bezier(0.25, 1, 0.5, 1)";
+  wheel.style.transform = `translateY(${finalTranslate}px)`;
 
-  currentOffset += offset;
-  wheel.style.transform = translateY(-${currentOffset}px);
+  spinBtn.disabled = true;
 
   setTimeout(() => {
-    result.textContent = Вам выпала: ${sections[index].name};
-    spinning = false;
-  }, 3000);
-};
+    prizeName.textContent = prize.name;
+    prizeImage.src = prize.image;
+    prizePopup.style.display = "flex";
+    wheel.style.transition = "none";
+    // Сброс позиции колеса для бесконечного эффекта
+    wheel.style.transform = `translateY(${-index * sectionHeight}px)`;
+    spinBtn.disabled = false;
+  }, 7000);
+}
 
-/**
- * 🔓 "Проверка" подписки
- */
-subscribedBtn.onclick = () => {
-  overlay.style.display = "none";
-  spinBtn.disabled = false;
-};
+spinBtn.addEventListener("click", spinWheel);
+closePopup.addEventListener("click", () => {
+  prizePopup.style.display = "none";
+});
