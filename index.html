@@ -49,16 +49,10 @@
 
         #gift-btn { width: 180px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); margin-bottom: 20px; }
 
-        /* Кнопка Список призов */
         .prizes-list-btn {
             background: linear-gradient(45deg, #ffd700, #ffae00);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            color: black; border: none; padding: 10px 20px; border-radius: 10px;
+            font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .footer-link {
@@ -79,7 +73,7 @@
 
         #prize-img { width: 85%; max-width: 400px; border-radius: 20px; }
 
-        /* Сетка призов в модалке */
+        /* Сетка призов */
         .prizes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -87,17 +81,29 @@
             padding: 20px;
             overflow-y: auto;
             max-height: 70vh;
+            width: 90%;
         }
         .prizes-grid img { width: 100%; border-radius: 10px; border: 1px solid #444; }
+        
+        /* Джекпот в центре и большой */
+        .jackpot-item {
+            grid-column: span 2;
+            justify-self: center;
+            width: 80% !important;
+            border: 2px solid #ffd700 !important;
+            box-shadow: 0 0 20px #ffd700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px #ffd700; }
+            100% { transform: scale(1); }
+        }
 
         .close-modal {
-            margin-top: 20px;
-            background: #fff;
-            color: #000;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 10px;
-            font-weight: bold;
+            margin-top: 20px; background: #fff; color: #000;
+            border: none; padding: 10px 25px; border-radius: 10px; font-weight: bold;
         }
 
         .promo-section { margin-top: 20px; width: 80%; max-width: 300px; padding-bottom: 80px; }
@@ -126,18 +132,24 @@
 </div>
 
 <div id="prizes-modal">
-    <h3>Возможные призы</h3>
+    <h3 style="color: #ffd700;">Главный приз</h3>
     <div class="prizes-grid" id="grid-content">
-        </div>
+        <img src="jackpot.png" class="jackpot-item">
+        <img src="5percent.png">
+        <img src="10percent.png">
+        <img src="15percent.png">
+        <img src="20percent.png">
+        <img src="30percent.png">
+        <img src="50percent.png">
+    </div>
     <button class="close-modal" onclick="closePrizesModal()">Закрыть</button>
 </div>
 
 <div id="result-container">
     <h2 id="win-text">Твой приз!</h2>
     <img src="" id="prize-img">
-    
     <div class="promo-section" id="promo-area">
-        <p style="font-size: 0.8rem; color: #ccc;">Напиши продавцу, чтобы воспользоваться скидкой. <br>Для повторной прокрутки нужен код!</p>
+        <p style="font-size: 0.8rem; color: #ccc;">Напиши продавцу чтобы воспользоваться скидкой. <br>Для повторной прокрутки нужен код!</p>
         <input type="text" id="promo-input" class="promo-input" placeholder="Введите промокод">
         <button class="promo-btn" onclick="usePromo()">Активировать</button>
     </div>
@@ -169,13 +181,6 @@
         if (savedPrize) {
             showFinalPrize(savedPrize);
         }
-        // Заполняем сетку призов
-        const grid = document.getElementById('grid-content');
-        prizes.forEach(p => {
-            const img = document.createElement('img');
-            img.src = p.img;
-            grid.appendChild(img);
-        });
     };
 
     function checkSub() {
@@ -195,25 +200,17 @@
         btn.classList.add('shake');
         setTimeout(() => btn.classList.remove('shake'), 200);
         hint.innerText = `Осталось до открытия: ${3 - clicks}`;
-
-        if (clicks === 3) {
-            drawPrize();
-        }
+        if (clicks === 3) drawPrize();
     };
 
     function drawPrize() {
         const random = Math.random() * 100;
         let current = 0;
         let winImg = '';
-
         for (let p of prizes) {
             current += p.chance;
-            if (random <= current) {
-                winImg = p.img;
-                break;
-            }
+            if (random <= current) { winImg = p.img; break; }
         }
-        
         localStorage.setItem('userPrize', winImg);
         showFinalPrize(winImg);
     }
@@ -224,21 +221,16 @@
         document.getElementById('sub-screen').style.display = 'none';
         document.getElementById('prizes-modal').style.display = 'none';
         document.getElementById('result-container').style.display = 'flex';
-        
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred('success');
-        }
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     }
 
     function usePromo() {
         const input = document.getElementById('promo-input').value.trim().toUpperCase();
         let usedPromos = JSON.parse(localStorage.getItem('usedPromos') || "[]");
-
         if (usedPromos.includes(input)) {
             tg.showAlert("Этот промокод уже был использован вами!");
             return;
         }
-
         if (VALID_PROMOS.includes(input)) {
             usedPromos.push(input);
             localStorage.setItem('usedPromos', JSON.stringify(usedPromos));
