@@ -36,9 +36,7 @@
         .btn-link { background: #24A1DE; color: white; }
         .btn-check { background: #ffd700; color: black; }
 
-        .instructions { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-
-        /* Анимации подарка */
+        /* Анимации открытия */
         @keyframes shake {
             0% { transform: rotate(0deg); }
             25% { transform: rotate(5deg); }
@@ -49,90 +47,99 @@
         
         @keyframes openGift {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.8; filter: brightness(1.5); }
-            100% { transform: scale(2); opacity: 0; }
+            100% { transform: scale(2.5); opacity: 0; filter: blur(10px); }
         }
 
         .shake { animation: shake 0.2s ease-in-out; }
-        .open-anim { animation: openGift 0.5s forwards ease-out; }
+        .open-anim { animation: openGift 0.6s forwards cubic-bezier(0.5, 0, 0.5, 1); }
 
-        #gift-btn { width: 180px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); margin-bottom: 20px; transition: transform 0.2s; }
+        #gift-btn { width: 180px; cursor: pointer; filter: drop-shadow(0 0 15px rgba(255,0,0,0.4)); margin-bottom: 20px; }
 
+        /* Экран результата с улучшенной анимацией */
+        #result-container {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92); flex-direction: column; justify-content: center;
+            align-items: center; z-index: 300; backdrop-filter: blur(8px);
+        }
+
+        @keyframes prizeShow {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+            50% { box-shadow: 0 0 50px rgba(255,215,0,0.6); }
+            100% { box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+        }
+
+        #prize-img { 
+            width: 80%; max-width: 350px; border-radius: 25px; 
+            animation: prizeShow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border: 3px solid rgba(255,215,0,0.3);
+            background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 70%);
+        }
+
+        .win-light {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%);
+            animation: glow 3s infinite; z-index: -1;
+        }
+
+        /* Остальные элементы */
         .prizes-list-btn {
             background: linear-gradient(45deg, #ffd700, #ffae00);
-            color: black; border: none; padding: 10px 20px; border-radius: 10px;
+            color: black; border: none; padding: 12px 25px; border-radius: 12px;
             font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .footer-link {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; text-decoration: none;
-            color: white; background: rgba(0, 0, 0, 0.6);
-            padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px);
-            z-index: 200; white-space: nowrap;
-        }
-        .footer-link img { width: 24px; height: 24px; margin-right: 10px; }
-        .footer-link span { font-size: 1rem; font-weight: bold; }
-
-        #result-container, #prizes-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center;
-            align-items: center; z-index: 300;
+            color: white; background: rgba(0, 0, 0, 0.7);
+            padding: 12px 24px; border-radius: 50px; backdrop-filter: blur(5px);
+            z-index: 400; border: 1px solid rgba(255,255,255,0.1);
         }
 
-        #prize-img { width: 85%; max-width: 400px; border-radius: 20px; }
-
-        .prizes-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-            padding: 20px; overflow-y: auto; max-height: 70vh; width: 90%;
-        }
-        .prizes-grid img { width: 100%; border-radius: 10px; border: 1px solid #444; }
-        
-        .jackpot-item {
-            grid-column: span 2; justify-self: center; width: 80% !important;
-            border: 2px solid #ffd700 !important; box-shadow: 0 0 20px #ffd700;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); box-shadow: 0 0 30px #ffd700; }
-            100% { transform: scale(1); }
-        }
-
-        .close-modal {
-            margin-top: 20px; background: #fff; color: #000;
-            border: none; padding: 10px 25px; border-radius: 10px; font-weight: bold;
-        }
-
-        .promo-section { margin-top: 20px; width: 80%; max-width: 300px; padding-bottom: 80px; }
+        .promo-section { margin-top: 30px; width: 85%; max-width: 320px; z-index: 310; padding-bottom: 100px;}
         .promo-input {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            margin-bottom: 10px; text-align: center; font-size: 1rem; box-sizing: border-box;
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #444;
+            background: #111; color: white; margin-bottom: 12px; text-align: center;
         }
         .promo-btn {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: #28a745; color: white; font-weight: bold; cursor: pointer;
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background: #28a745; color: white; font-weight: bold;
         }
+
+        /* Сетка призов */
+        #prizes-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.96); flex-direction: column; justify-content: center;
+            align-items: center; z-index: 500;
+        }
+        .prizes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 90%; }
+        .prizes-grid img { width: 100%; border-radius: 12px; }
+        .jackpot-item { grid-column: span 2; width: 70% !important; border: 2px solid #ffd700; align-self: center; margin-left: auto; margin-right: auto;}
     </style>
 </head>
 <body>
 
 <div id="sub-screen">
-    <h2>Для получения скидки подпишись на канал</h2>
+    <h2 style="margin-bottom: 25px;">Подпишись на канал,<br>чтобы крутить!</h2>
     <a href="https://t.me/tokk1oTT" class="sub-btn btn-link">1. Перейти в канал</a>
     <button class="sub-btn btn-check" onclick="checkSub()">2. Я подписался</button>
 </div>
 
 <div id="app">
-    <div class="instructions" id="hint">Открой подарок!</div>
-    <img src="gift.png" id="gift-btn" alt="Открыть подарок">
-    <button class="prizes-list-btn" onclick="openPrizesModal()">Список призов</button>
+    <div class="instructions" id="hint" style="font-size: 1.4rem;">Нажми на подарок 3 раза!</div>
+    <img src="gift.png" id="gift-btn" alt="Открыть">
+    <button class="prizes-list-btn" onclick="openPrizesModal()">Список всех призов</button>
 </div>
 
 <div id="prizes-modal">
-    <h3 style="color: #ffd700;">Главный приз</h3>
-    <div class="prizes-grid" id="grid-content">
+    <h3 style="color: #ffd700; margin-bottom: 20px;">Шанс выпадения</h3>
+    <div class="prizes-grid">
         <img src="jackpot.png" class="jackpot-item">
         <img src="5percent.png">
         <img src="10percent.png">
@@ -141,16 +148,17 @@
         <img src="30percent.png">
         <img src="50percent.png">
     </div>
-    <button class="close-modal" onclick="closePrizesModal()">Закрыть</button>
+    <button class="sub-btn btn-check" style="margin-top:30px; width:auto;" onclick="closePrizesModal()">Закрыть</button>
 </div>
 
 <div id="result-container">
-    <h2 id="win-text">Твой приз!</h2>
+    <div class="win-light"></div>
+    <h2 id="win-text" style="color: #ffd700; font-size: 2rem; margin-bottom: 15px;">ПОЗДРАВЛЯЕМ!</h2>
     <img src="" id="prize-img">
-    <div class="promo-section" id="promo-area">
-        <p style="font-size: 0.8rem; color: #ccc;">Напиши продавцу чтобы воспользоваться скидкой. <br>Для повторной прокрутки нужен код!</p>
-        <input type="text" id="promo-input" class="promo-input" placeholder="Введите промокод">
-        <button class="promo-btn" onclick="usePromo()">Активировать</button>
+    <div class="promo-section">
+        <p style="font-size: 0.9rem; color: #bbb; line-height: 1.4;">Чтобы забрать приз, напиши продавцу.<br>Для еще одной попытки введи код:</p>
+        <input type="text" id="promo-input" class="promo-input" placeholder="ПРОМОКОД">
+        <button class="promo-btn" onclick="usePromo()">АКТИВИРОВАТЬ КОД</button>
     </div>
 </div>
 
@@ -164,6 +172,7 @@
     tg.expand();
 
     const VALID_PROMOS = ["TOKK1O2025", "TOKK1OPASS", "TOKK1ONEWYEAR", "PASS4000"];
+    const INFINITE_PROMO = "ELQDAR04";
 
     const prizes = [
         { img: '5percent.png', chance: 40 },
@@ -177,7 +186,7 @@
 
     window.onload = () => {
         const savedPrize = localStorage.getItem('userPrize');
-        if (savedPrize) showFinalPrize(savedPrize);
+        if (savedPrize) showFinalPrize(savedPrize, true);
     };
 
     function checkSub() {
@@ -191,33 +200,25 @@
     let clicks = 0;
     let isOpening = false;
     const btn = document.getElementById('gift-btn');
-    const hint = document.getElementById('hint');
 
     btn.onclick = () => {
         if(isOpening) return;
         clicks++;
-        
         if (clicks < 3) {
             btn.classList.add('shake');
             setTimeout(() => btn.classList.remove('shake'), 200);
-            hint.innerText = `Осталось до открытия: ${3 - clicks}`;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         } else {
             isOpening = true;
-            hint.innerText = "ОТКРЫВАЕМ...";
             btn.classList.add('open-anim');
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-            
-            // Задержка перед показом приза
-            setTimeout(() => {
-                drawPrize();
-            }, 500);
+            setTimeout(() => drawPrize(), 600);
         }
     };
 
     function drawPrize() {
         const random = Math.random() * 100;
-        let current = 0;
-        let winImg = '';
+        let current = 0, winImg = '';
         for (let p of prizes) {
             current += p.chance;
             if (random <= current) { winImg = p.img; break; }
@@ -226,8 +227,11 @@
         showFinalPrize(winImg);
     }
 
-    function showFinalPrize(imgSrc) {
-        document.getElementById('prize-img').src = imgSrc;
+    function showFinalPrize(imgSrc, skipAnim = false) {
+        const img = document.getElementById('prize-img');
+        img.src = imgSrc;
+        if(skipAnim) img.style.animation = "none";
+        
         document.getElementById('app').style.display = 'none';
         document.getElementById('sub-screen').style.display = 'none';
         document.getElementById('prizes-modal').style.display = 'none';
@@ -237,16 +241,20 @@
 
     function usePromo() {
         const input = document.getElementById('promo-input').value.trim().toUpperCase();
-        let usedPromos = JSON.parse(localStorage.getItem('usedPromos') || "[]");
-        if (usedPromos.includes(input)) {
-            tg.showAlert("Этот промокод уже был использован вами!");
+        if (input === INFINITE_PROMO) {
+            localStorage.removeItem('userPrize');
+            location.reload();
+            return;
+        }
+        let used = JSON.parse(localStorage.getItem('usedPromos') || "[]");
+        if (used.includes(input)) {
+            tg.showAlert("Этот код уже использован!");
             return;
         }
         if (VALID_PROMOS.includes(input)) {
-            usedPromos.push(input);
-            localStorage.setItem('usedPromos', JSON.stringify(usedPromos));
+            used.push(input);
+            localStorage.setItem('usedPromos', JSON.stringify(used));
             localStorage.removeItem('userPrize');
-            tg.showAlert("Промокод активирован! У вас есть новая попытка.");
             location.reload();
         } else {
             tg.showAlert("Неверный промокод!");
