@@ -28,17 +28,15 @@ function getWinningPrize() {
         }
         random -= prize.chance;
     }
-    // В случае ошибки возвращаем самый частый приз
     return prizes[0]; 
 }
 
 // --- 2. Генерация секторов для рулетки ---
 function populateWheel() {
-    // Создаем "длинную" рулетку, повторяя призы много раз
+    // Создаем "длинную" рулетку, повторяя призы
     const REPETITIONS = 20;
 
     for (let i = 0; i < REPETITIONS; i++) {
-        // Перемешиваем призы, чтобы создать непредсказуемый порядок
         const shuffledPrizes = [...prizes].sort(() => Math.random() - 0.5);
 
         shuffledPrizes.forEach(prize => {
@@ -47,6 +45,8 @@ function populateWheel() {
             sector.setAttribute('data-id', prize.id);
             sector.setAttribute('data-chance-group', prize.chanceGroup);
             sector.textContent = prize.text;
+            // Если используете изображения, замените строку выше на:
+            // sector.innerHTML = `<img src="images/discount_${prize.id}.png" alt="${prize.text}">`;
             wheel.appendChild(sector);
             sectorsInWheel.push(sector);
         });
@@ -59,64 +59,62 @@ spinButton.addEventListener('click', () => {
     isSpinning = true;
     spinButton.disabled = true;
 
-    // 1. Определяем приз-победитель
     const winningPrize = getWinningPrize();
-    console.log("Выигрышный приз:", winningPrize.text);
-
-    // 2. Выбираем, на каком секторе-дубликате остановиться
-    const winningSectors = sectorsInWheel.filter(s => s.getAttribute('data-id') === winningPrize.id);
     
-    // Выбираем сектор для остановки в последней трети, чтобы обеспечить достаточный "пробег"
+    // Определяем, на каком секторе-дубликате остановиться (выбираем в последней трети)
+    const winningSectors = sectorsInWheel.filter(s => s.getAttribute('data-id') === winningPrize.id);
     const startRange = Math.floor(winningSectors.length * 0.7);
     const endRange = winningSectors.length - 1; 
     
-    if (startRange > endRange) startRange = endRange;
-
+    // Случайный выбор конечного сектора
     const selectedSectorIndex = Math.floor(Math.random() * (endRange - startRange + 1)) + startRange;
     const finalSector = winningSectors[selectedSectorIndex];
-    
-    // Индекс этого сектора в общем списке секторов
     const finalPositionIndex = sectorsInWheel.indexOf(finalSector);
 
-    // 3. Расчет смещения
     
-    // Мы хотим, чтобы ВЕРХНЯЯ ГРАНИЦА выигрышного сектора остановилась ровно посередине
-    // Посередине - это 1.5 высоты сектора от верха контейнера (так как видно 3 сектора)
+    // --- Расчет смещения для центрирования ---
     
-    // Смещение до верха сектора: finalPositionIndex * SECTOR_HEIGHT
-    // Центрирование: -(Смещение до верха сектора) + (1 * SECTOR_HEIGHT)
-    // 1 * SECTOR_HEIGHT - это смещение, чтобы верх сектора был на 100px ниже центра указателя
-    const translateY = (finalPositionIndex * SECTOR_HEIGHT) - (SECTOR_HEIGHT * 1);
+    // 1. Позиция остановки (перемещение, чтобы выигрышный сектор был в центре видимой области)
+    // Центр контейнера (указатель) находится на 1.5 * SECTOR_HEIGHT (так как видно 3 сектора)
+    // Мы хотим, чтобы ВЕРХНЯЯ ГРАНИЦА выигрышного сектора оказалась на расстоянии 1 * SECTOR_HEIGHT от верха.
+    const translateY_Stop = (finalPositionIndex * SECTOR_HEIGHT) - (SECTOR_HEIGHT * 1);
     
-    // Добавляем дополнительные обороты, чтобы рулетка прокрутилась много раз
-    const extraSpins = 10 * sectorsInWheel.length;
-    const finalTransform = -(extraSpins * SECTOR_HEIGHT + translateY);
+    // 2. Добавляем дополнительные обороты для эффекта
+    const fullSpins = 10; // Минимум 10 полных оборотов
+    const totalWheelLength = sectorsInWheel.length * SECTOR_HEIGHT;
     
-    // Применяем вращение
-    wheel.style.transition = 'none'; // Сброс
-    wheel.style.transform = `translateY(0px)`;
+    // Общее расстояние, на которое нужно сместить рулетку вверх (отрицательное значение)
+    const finalTransform = -( (fullSpins * totalWheelLength) + translateY_Stop );
     
-    // Ждем, чтобы применить сброс, прежде чем начать анимацию
+    
+    // --- Сброс и запуск анимации ---
+    
+    // 1. Мгновенно сбрасываем transition и позицию перед стартом
+    wheel.style.transition = 'none';
+    
+    // Устанавливаем позицию в 0 (если она была сброшена после предыдущего вращения)
+    // Это критично для избежания "белого фона", если предыдущее вращение закончилось далеко.
+    wheel.style.transform = `translateY(${-(translateY_Stop)}px)`; 
+    // ^ Устанавливаем в "начало" выигрышного сектора, чтобы анимация стартовала плавно
+
+    
+    // 2. Запуск анимации
     setTimeout(() => {
         wheel.classList.add('spinning');
         wheel.style.transform = `translateY(${finalTransform}px)`;
 
-        // 4. Обработка завершения вращения
+        // 3. Обработка завершения вращения
         setTimeout(() => {
             isSpinning = false;
             spinButton.disabled = false;
             
-            // --- Логика для Telegram Web App ---
             let resultMessage = `🎉 Вы выиграли ${winningPrize.text}!`;
             
             if (window.Telegram && window.Telegram.WebApp) {
-                // Отправляем результат обратно в бота
+                // Логика для Telegram Mini App (вибрация, алерт, отправка данных)
                 Telegram.WebApp.ready();
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                
-                // В Mini App лучше использовать Telegram.WebApp.showAlert
                 Telegram.WebApp.showAlert(resultMessage, () => {
-                    // Отправка данных при закрытии алерта
                     Telegram.WebApp.sendData(JSON.stringify({
                         prize_id: winningPrize.id,
                         discount: parseInt(winningPrize.id),
@@ -124,20 +122,20 @@ spinButton.addEventListener('click', () => {
                     }));
                 });
             } else {
-                // Если не в Telegram
                 alert(resultMessage);
             }
 
-            // **ВАЖНО:** Сброс позиции для следующего спина
+            // **ВАЖНО:** Финальный сброс позиции для следующего спина
             wheel.classList.remove('spinning');
             
-            // Смещаем рулетку обратно, вычитая полные обороты
-            const remainderOffset = -(translateY); 
+            // Устанавливаем рулетку в позицию остановки БЕЗ анимации
+            const remainderOffset = -(translateY_Stop); 
             wheel.style.transform = `translateY(${remainderOffset}px)`;
             
-        }, TOTAL_DURATION); // Используем переменную длительности
-    }, 50);
+        }, TOTAL_DURATION);
+    }, 50); // Небольшая задержка для применения сброса
 });
 
 // Инициализация при загрузке
 populateWheel();
+                
