@@ -1,27 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Колесо фортуны</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вертикальная Рулетка (Текстовая версия)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="wheel-container">
-    <div class="wheel" id="wheel">
-      <!-- Секции будут динамически добавлены через JS -->
-    </div>
-    <button id="spinBtn">Крутить</button>
-  </div>
+    <div class="wheel-container">
+        <div class="pointer"></div>
 
-  <div class="prize-popup" id="prizePopup">
-    <div class="prize-content">
-      <h2 id="prizeName"></h2>
-      <img id="prizeImage" src="" alt="Приз">
-      <button id="closePopup">Закрыть</button>
+        <div class="wheel">
+            </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <button id="spinButton">Крутить!</button>
+
+    <script src="script.js"></script>
 </body>
 </html>

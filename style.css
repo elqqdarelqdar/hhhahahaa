@@ -1,71 +1,104 @@
+:root {
+    /* Высота сектора, чтобы рулетка была вертикальной */
+    --sector-height: 100px;
+    /* Цвета для текстовых секторов */
+    --color-high-chance: #c8e6c9; /* Светло-зеленый (5%, 10%) */
+    --color-medium-chance: #fff59d; /* Светло-желтый (15%, 20%, 30%) */
+    --color-low-chance: #ffccbc; /* Светло-красный (50%, 100%) */
+}
+
 body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    padding: 20px;
 }
 
 .wheel-container {
-  position: relative;
-  width: 200px;
+    /* Определяем видимую область рулетки (окно) */
+    position: relative;
+    width: 300px;
+    height: calc(var(--sector-height) * 3); /* Видно 3 сектора */
+    overflow: hidden;
+    border: 6px solid #4a148c; /* Фиолетовая рамка */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+}
+
+.pointer {
+    /* Указатель, который всегда находится по центру */
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px; /* Толще для заметности */
+    background-color: #e53935; /* Красный цвет */
+    z-index: 10;
+    transform: translateY(-50%);
 }
 
 .wheel {
-  border: 5px solid #333;
-  height: 400px;
-  width: 200px;
-  overflow: hidden;
-  position: relative;
+    /* Контейнер, который будет вращаться (перемещаться по оси Y) */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
-.section {
-  height: 57px; /* 400px / 7 ~ 57px */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #ccc;
-  transition: transform 0.5s ease-out;
-  background: #fff;
+.sector {
+    height: var(--sector-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    border-bottom: 1px solid #999;
+    box-sizing: border-box;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
 }
 
-.section img {
-  height: 40px;
-  margin-right: 10px;
+/* Цветовая схема по шансам */
+.sector[data-chance-group="high"] {
+    background-color: var(--color-high-chance);
+}
+.sector[data-chance-group="medium"] {
+    background-color: var(--color-medium-chance);
+}
+.sector[data-chance-group="low"] {
+    background-color: var(--color-low-chance);
 }
 
-#wheel.spin {
-  transition: transform 7s cubic-bezier(0.25, 1, 0.5, 1);
+
+#spinButton {
+    margin-top: 25px;
+    padding: 12px 30px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: white;
+    background-color: #4CAF50; /* Зеленая кнопка */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s, transform 0.2s;
 }
 
-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+#spinButton:hover:not(:disabled) {
+    background-color: #45a049;
 }
 
-.prize-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0,0,0,0.7);
+#spinButton:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
 }
 
-.prize-content {
-  background: #fff;
-  padding: 20px;
-  text-align: center;
-  border-radius: 10px;
-}
-
-.prize-content img {
-  max-width: 150px;
-  margin-top: 10px;
+.wheel.spinning {
+    transition: transform 5s cubic-bezier(0.1, 0.5, 0.2, 1); /* Добавлен плавный выход (ease-out) */
 }
