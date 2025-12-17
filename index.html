@@ -7,7 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #a51d1d; /* Праздничный красный */
+            /* Установка твоего фона */
+            background: url('background.png') no-repeat center center fixed;
+            background-size: cover;
             font-family: sans-serif;
             display: flex;
             justify-content: center;
@@ -19,11 +21,10 @@
             text-align: center;
         }
 
-        #app { width: 100%; }
+        #app { width: 100%; position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-        .instructions { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; }
+        .instructions { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
 
-        /* Анимация тряски */
         @keyframes shake {
             0% { transform: rotate(0deg); }
             25% { transform: rotate(5deg); }
@@ -38,59 +39,92 @@
             width: 200px;
             cursor: pointer;
             transition: transform 0.1s;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
         }
 
         #gift-btn:active { transform: scale(0.9); }
+
+        /* Кнопка "Написать продавцу" снизу */
+        .footer-link {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+        }
+
+        .footer-link img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .footer-link span {
+            font-size: 1rem;
+            font-weight: bold;
+        }
 
         /* Окно результата */
         #result-container {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
         }
 
-        #prize-img { width: 80%; max-width: 400px; border-radius: 20px; }
+        #prize-img { width: 85%; max-width: 400px; border-radius: 20px; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
 
         button.close-btn {
-            margin-top: 20px;
-            padding: 10px 25px;
+            margin-top: 25px;
+            padding: 12px 30px;
             background: #ffd700;
             border: none;
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
+            color: #000;
         }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="instructions" id="hint">Нажми на подарок 3 раза!</div>
+    <div class="instructions" id="hint">Открой подарок!</div>
     <img src="gift.png" id="gift-btn" alt="Открыть подарок">
+
+    <a href="https://t.me/tokk1o_pass" class="footer-link">
+        <img src="tg_logo.png" alt="TG">
+        <span>Написать продавцу</span>
+    </a>
 </div>
 
 <div id="result-container">
-    <h2 id="win-text">Ваш приз!</h2>
+    <h2 id="win-text">Тебе выпала скидка в размере</h2>
     <img src="" id="prize-img">
     <button class="close-btn" onclick="location.reload()">Попробовать еще раз</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Развернуть на весь экран
+    tg.expand();
 
     const prizes = [
         { img: '5percent.png', chance: 40 },
-        { img: '15percent.png', chance: 25 },
-        { img: '20percent.png', chance: 15 },
-        { img: '30percent.png', chance: 10 },
-        { img: '50percent.png', chance: 8 },
-        { img: 'jackpot.png', chance: 2 } // Шанс 2%
+        { img: '10percent.png', chance: 30 },
+        { img: '15percent.png', chance: 15 },
+        { img: '20percent.png', chance: 10 },
+        { img: '30percent.png', chance: 3.3 },
+        { img: '50percent.png', chance: 1.5 },
+        { img: 'jackpot.png', chance: 0.2 }
     ];
 
     let clicks = 0;
@@ -125,7 +159,6 @@
         document.getElementById('prize-img').src = winImg;
         document.getElementById('result-container').style.display = 'flex';
         
-        // Вибрация телефона (если поддерживает Telegram)
         if (tg.HapticFeedback) {
             tg.HapticFeedback.notificationOccurred('success');
         }
