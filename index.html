@@ -22,27 +22,16 @@
 
         #app { display: none; width: 100%; position: relative; height: 100vh; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* Экран подписки */
         #sub-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.8);
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.85); position: fixed; top:0; left:0; width:100%; height:100%;
+            z-index: 100; padding: 20px; box-sizing: border-box;
         }
 
         .sub-btn {
-            display: block;
-            margin: 10px;
-            padding: 15px 30px;
-            border-radius: 15px;
-            text-decoration: none;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
+            display: block; margin: 10px; padding: 15px 30px; border-radius: 15px;
+            text-decoration: none; font-weight: bold; border: none; cursor: pointer;
+            width: 80%; max-width: 300px;
         }
         .btn-link { background: #24A1DE; color: white; }
         .btn-check { background: #ffd700; color: black; }
@@ -58,66 +47,72 @@
         }
         .shake { animation: shake 0.2s ease-in-out; }
 
-        #gift-btn {
-            width: 200px;
-            cursor: pointer;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-        }
+        #gift-btn { width: 200px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
 
+        /* ИСПРАВЛЕННАЯ КНОПКА (теперь всегда сверху) */
         .footer-link {
-            position: absolute;
-            bottom: 30px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: white;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 10px 20px;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; text-decoration: none;
+            color: white; background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px);
+            z-index: 200; /* Самый высокий слой */
+            white-space: nowrap;
         }
         .footer-link img { width: 24px; height: 24px; margin-right: 10px; }
+        .footer-link span { font-size: 1rem; font-weight: bold; }
 
         #result-container {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center;
+            align-items: center; z-index: 10;
         }
         #prize-img { width: 85%; max-width: 400px; border-radius: 20px; }
+
+        .promo-section { margin-top: 20px; width: 80%; max-width: 300px; padding-bottom: 80px; }
+        .promo-input {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            margin-bottom: 10px; text-align: center; font-size: 1rem; box-sizing: border-box;
+        }
+        .promo-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: #28a745; color: white; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
 <div id="sub-screen">
-    <h2>Подпишись, чтобы участвовать!</h2>
-    <a href="https://t.me/tokk1oTT" class="sub-btn btn-link">1. Подписаться на канал</a>
+    <h2>Для получения скидки подпишись на канал</h2>
+    <a href="https://t.me/tokk1oTT" class="sub-btn btn-link">1. Перейти в канал</a>
     <button class="sub-btn btn-check" onclick="checkSub()">2. Я подписался</button>
 </div>
 
 <div id="app">
     <div class="instructions" id="hint">Открой подарок!</div>
     <img src="gift.png" id="gift-btn" alt="Открыть подарок">
-
-    <a href="https://t.me/tokk1o_pass" class="footer-link">
-        <img src="tg_logo.png" alt="TG">
-        <span>Написать продавцу</span>
-    </a>
 </div>
 
 <div id="result-container">
     <h2 id="win-text">Твой приз!</h2>
     <img src="" id="prize-img">
-    <p style="margin-top:20px; color: #aaa;">Вы уже использовали свою попытку</p>
+    
+    <div class="promo-section" id="promo-area">
+        <p style="font-size: 0.9rem; color: #ccc;">Напиши продавцу чтобы воспользоватся скидкой.    Для повторной прокрутки нужен код!</p>
+        <input type="text" id="promo-input" class="promo-input" placeholder="Введите промокод">
+        <button class="promo-btn" onclick="usePromo()">Активировать</button>
+    </div>
 </div>
+
+<a href="https://t.me/tokk1o_pass" class="footer-link" id="seller-link">
+    <img src="tg_logo.png" alt="TG">
+    <span>Купить PASS ROYALE</span>
+</a>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+
+    const VALID_PROMOS = ["TOKK1O2025", "TOKK1OPASS", "TOKK1ONEWYEAR", "PASS4000"];
 
     const prizes = [
         { img: '5percent.png', chance: 40 },
@@ -129,7 +124,6 @@
         { img: 'jackpot.png', chance: 0.2 }
     ];
 
-    // Проверка лимита при загрузке
     window.onload = () => {
         const savedPrize = localStorage.getItem('userPrize');
         if (savedPrize) {
@@ -170,7 +164,7 @@
             }
         }
         
-        localStorage.setItem('userPrize', winImg); // Сохраняем навсегда
+        localStorage.setItem('userPrize', winImg);
         showFinalPrize(winImg);
     }
 
@@ -182,6 +176,26 @@
         
         if (tg.HapticFeedback) {
             tg.HapticFeedback.notificationOccurred('success');
+        }
+    }
+
+    function usePromo() {
+        const input = document.getElementById('promo-input').value.trim().toUpperCase();
+        let usedPromos = JSON.parse(localStorage.getItem('usedPromos') || "[]");
+
+        if (usedPromos.includes(input)) {
+            tg.showAlert("Этот промокод уже был использован вами!");
+            return;
+        }
+
+        if (VALID_PROMOS.includes(input)) {
+            usedPromos.push(input);
+            localStorage.setItem('usedPromos', JSON.stringify(usedPromos));
+            localStorage.removeItem('userPrize');
+            tg.showAlert("Промокод активирован! У вас есть новая попытка.");
+            location.reload();
+        } else {
+            tg.showAlert("Неверный промокод!");
         }
     }
 </script>
